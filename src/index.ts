@@ -1,1 +1,1 @@
-export {add} from './test'
+import OrderedMap from './ordered-map'
