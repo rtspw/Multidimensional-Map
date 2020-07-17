@@ -35,6 +35,14 @@ class OrderedMap<K, V> {
     return this.order[index]
   }
 
+  getKeys(): K[] {
+    return this.order
+  }
+
+  forEach(fn: (value: V, key: K, map: Map<K, V>) => void): void {
+    this.map.forEach(fn)
+  }
+
   delete(key: K) {
     const index = this.order.indexOf(key)
     if (index === -1) return false;
