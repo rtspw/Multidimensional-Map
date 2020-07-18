@@ -15,4 +15,4 @@ interface VolumeDataEntry {
 
 const test = new MultidimensionalMap<VolumeDataEntry>(['Day', 'Week', 'Month', 'Quarter', 'Year', 'Severity']);
 test.addEntries(data.VolumeData)
-console.dir(test, {depth: 3})
+console.log(test.filter({ Day: ['08/02/18', '08/04/18'], Severity: [1,2]}))
