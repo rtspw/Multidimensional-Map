@@ -33,11 +33,14 @@ class MultidimensionalMap<EntryT> {
   dimensions: DimensionCollection<EntryT[]>
   entries: EntryT[] = []
 
-  constructor(dimensions: string[]) {
+  constructor(dimensions: string[], entries?: EntryT[]) {
     this.dimensions = dimensions.reduce((acc: DimensionCollection<EntryT[]>, curr: string) => {
       acc[curr] = new OrderedMap<string | number, EntryT[]>()
       return acc
     }, {})
+    if (entries) {
+      this.addEntries(entries)
+    }
   }
 
   addEntries(entries: EntryT[]): void {
@@ -75,8 +78,10 @@ class MultidimensionalMap<EntryT> {
     return entryList
   }
 
-  getSubset(query: MatchQuery<string | number>): EntryT[] {
+  getSubsetArray(query: MatchQuery<string | number>): EntryT[] {
     const subsets = Object.entries(query).map(([dimensionName, dimensionItem]) => {
+      if (!this.dimensions.hasOwnProperty(dimensionName)) 
+        throw new Error(`Dimension "${dimensionName}" does not exist`) 
       if (Array.isArray(dimensionItem)) {
         const [start, end] = dimensionItem
         return this.getEntriesInRange(dimensionName, start, end)
@@ -86,7 +91,16 @@ class MultidimensionalMap<EntryT> {
     return getArrayIntersection(...subsets)
   }
 
-  combineEntries (dataEntries: EntryT[], measure: keyof EntryT, fields: string[]) {
+  getSubset(query: MatchQuery<string | number>): MultidimensionalMap<EntryT> {
+    const subsetArray = this.getSubsetArray(query)
+    return new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray)
+  }
+
+  combineEntries(measure: keyof EntryT, fields: string[], entries?: EntryT[]) {
+    fields.forEach(field => { 
+      if (!this.dimensions.hasOwnProperty(field)) throw new Error(`Field "${field}" does not exist`) 
+    })
+    const dataEntries = entries ? entries : this.entries
     if (dataEntries.length === 0) return []
     const nestedEntries = {}
     dataEntries.forEach(dataEntry => {
