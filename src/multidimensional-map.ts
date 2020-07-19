@@ -29,18 +29,18 @@ function getArrayIntersection<T>(...sets: (T[])[]) {
   return intersection
 }
 
-class MultidimensionalMap<T> {
-  dimensions: DimensionCollection<T[]>
-  entries: T[] = []
+class MultidimensionalMap<EntryT> {
+  dimensions: DimensionCollection<EntryT[]>
+  entries: EntryT[] = []
 
   constructor(dimensions: string[]) {
-    this.dimensions = dimensions.reduce((acc: DimensionCollection<T[]>, curr: string) => {
-      acc[curr] = new OrderedMap<string | number, T[]>()
+    this.dimensions = dimensions.reduce((acc: DimensionCollection<EntryT[]>, curr: string) => {
+      acc[curr] = new OrderedMap<string | number, EntryT[]>()
       return acc
     }, {})
   }
 
-  addEntries(entries: T[]): void {
+  addEntries(entries: EntryT[]): void {
     entries.forEach(entry => {
       this.entries.push(entry)
       Object.keys(this.dimensions).forEach(dimension => {
@@ -54,10 +54,14 @@ class MultidimensionalMap<T> {
     })
   }
 
-  getEntriesInRange(dimension: string, start: string | number, end: string | number) {
+  getAllEntries(): EntryT[] {
+    return this.entries
+  }
+
+  getEntriesInRange(dimension: string, start: string | number, end: string | number): EntryT[] {
     if (start === end) return this.dimensions[dimension].get(start) 
     let withinRange: boolean = false
-    const entryList: T[] = []
+    const entryList: EntryT[] = []
     this.dimensions[dimension].forEach((entries, item) => {
       if (withinRange) {
         if (item === end) withinRange = false
@@ -71,7 +75,7 @@ class MultidimensionalMap<T> {
     return entryList
   }
 
-  filter(query: MatchQuery<string | number>) {
+  getSubset(query: MatchQuery<string | number>): EntryT[] {
     const subsets = Object.entries(query).map(([dimensionName, dimensionItem]) => {
       if (Array.isArray(dimensionItem)) {
         const [start, end] = dimensionItem
@@ -80,6 +84,35 @@ class MultidimensionalMap<T> {
       return this.dimensions[dimensionName].get(dimensionItem as number | string)
     })
     return getArrayIntersection(...subsets)
+  }
+
+  combineEntries (dataEntries: EntryT[], measure: keyof EntryT, fields: string[]) {
+    if (dataEntries.length === 0) return []
+    const nestedEntries = {}
+    dataEntries.forEach(dataEntry => {
+      let current = nestedEntries
+      fields.forEach((subfield, idx) => {
+        if (current[dataEntry[subfield]] == null) {
+          if (idx >= fields.length - 1) {
+            const subset = { [measure]: dataEntry[measure] }
+            fields.forEach(subfield => { subset[subfield] = dataEntry[subfield] })
+            current[dataEntry[subfield]] = subset
+          } else {
+            current[dataEntry[subfield]] = {}
+          }
+        } else {
+          if (idx >= fields.length - 1) {
+            current[dataEntry[subfield]][measure] += dataEntry[measure]
+          }
+        }
+        current = current[dataEntry[subfield]]
+      })
+    })
+    return nestedEntries
+  }
+
+  get length() {
+    return this.entries.length
   }
 }
 
