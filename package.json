@@ -1,11 +1,23 @@
 {
   "name": "multidimensional-map",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "rollup -c",
+    "prebuild": "[ -d dist ] && rm -f dist/*",
+    "build": "rollup -c"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "rtspw",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^2.22.1",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "typescript": "^3.9.7"
+  }
 }

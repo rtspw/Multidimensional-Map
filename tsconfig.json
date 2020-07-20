@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ES6",
     "target": "es2015",
     "declaration": true,
     "outDir": "./dist",
-    "lib": ["ES6", "ES2017.Object"]
+    "lib": ["ES6", "ES2017.Object", "DOM"]
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
