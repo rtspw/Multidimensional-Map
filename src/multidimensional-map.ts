@@ -6,13 +6,13 @@ export interface DimensionCollection<T> {
 
 export type QueryRange<T> = [T, T]
 
-export interface Query<T> {
+export interface QueryDetails<T> {
   matches?: (string | number)[],
   range?: QueryRange<T>
 }
 
 export interface MatchQuery<T> {
-  [dimension: string]: T | Query<T>
+  [dimension: string]: T | QueryDetails<T>
 }
 
 /* Gets the intersection of the Array type (not Set)
@@ -66,18 +66,13 @@ class MultidimensionalMap<EntryT> {
     return this.entries
   }
 
-  getEntriesInRange(dimension: string, start: string | number, end: string | number): EntryT[] {
-    if (!this.dimensions.hasOwnProperty(dimension))
-      throw new Error(`Dimension "${dimension}" does not exist`) 
+  getEntriesInRange(dimension: string, start: string | number | null, end: string | number | null): EntryT[] {
+    if (!this.dimensions.hasOwnProperty(dimension)) throw new Error(`Dimension "${dimension}" does not exist`) 
     const targetDimension: OrderedMap<string | number, EntryT[]> = this.dimensions[dimension]
-    const startIdx: number = (() => {
-      const startIdx = targetDimension.indexOf(start)
-      return startIdx === -1 ? 0 : startIdx
-    })()
-    const endIdx: number = (() => {
-      const endIdx = targetDimension.indexOf(end)
-      return endIdx === -1 ? targetDimension.length - 1 : endIdx
-    })()
+    const startIdx = start == null ? 0 : targetDimension.indexOf(start)
+    const endIdx = end == null ? targetDimension.length - 1 : targetDimension.indexOf(end)
+    if (startIdx === -1) throw new Error(`Range start "${start}" does not exist in dimension`)
+    if (endIdx === -1) throw new Error(`Range end "${end}" does not exist`)
     const entryList: EntryT[] = []
     for (let i = startIdx; i <= endIdx; i++) {
       const entries = targetDimension.getAt(i)
@@ -114,13 +109,18 @@ class MultidimensionalMap<EntryT> {
     return new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray)
   }
 
-  combineEntries(measure: keyof EntryT, fields: string[], entries?: EntryT[]) {
-    fields.forEach(field => { 
-      if (!this.dimensions.hasOwnProperty(field)) throw new Error(`Field "${field}" does not exist`) 
-    })
+  combineEntries(measure: keyof EntryT, fields?: string[], entries?: EntryT[]) {
     const dataEntries = entries ? entries : this.entries
     if (dataEntries.length === 0) return []
     const nestedEntries = {}
+    if (fields == null || fields.length === 0) {
+      nestedEntries[measure as string] = 0
+      dataEntries.forEach(entry => nestedEntries[measure as string] += entry[measure])
+      return nestedEntries
+    }
+    fields.forEach(field => { 
+      if (!this.dimensions.hasOwnProperty(field)) throw new Error(`Field "${field}" does not exist`) 
+    })
     dataEntries.forEach(dataEntry => {
       let current = nestedEntries
       fields.forEach((subfield, idx) => {
