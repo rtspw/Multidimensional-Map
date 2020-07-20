@@ -92,9 +92,12 @@ class MultidimensionalMap<EntryT> {
           const [start, end] = dimensionItem.range
           return this.getEntriesInRange(dimensionName, start, end)
         } else if (dimensionItem.matches) {
-          return dimensionItem.matches.map((queryItem) => {
-            return this.dimensions[dimensionName].get(queryItem as number | string)
-          }).flat(1)
+          const matchingEntries: EntryT[] = []
+          dimensionItem.matches.forEach((queryItem) => {
+            const matchResult = this.dimensions[dimensionName].get(queryItem as number | string)
+            matchingEntries.push(...matchResult)
+          })
+          return matchingEntries
         } else {
           return this.entries
         }

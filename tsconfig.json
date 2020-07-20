@@ -4,7 +4,7 @@
     "target": "es2015",
     "declaration": true,
     "outDir": "./dist",
-    "lib": ["ESNext"]
+    "lib": ["ES6", "ES2017.Object"]
   },
   "include": [
     "src/**/*"
