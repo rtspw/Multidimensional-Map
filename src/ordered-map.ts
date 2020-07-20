@@ -26,7 +26,7 @@ class OrderedMap<K, V> {
     return this.map.get(this.order[index])
   }
   
-  getEntryAt(index: number): [K, V] {
+  getPairAt(index: number): [K, V] {
     const mapKey = this.order[index]
     return [mapKey, this.map.get(mapKey)]
   }
@@ -41,6 +41,10 @@ class OrderedMap<K, V> {
 
   forEach(fn: (value: V, key: K, map: Map<K, V>) => void): void {
     this.map.forEach(fn)
+  }
+
+  indexOf(key: K) {
+    return this.order.indexOf(key)
   }
 
   delete(key: K) {

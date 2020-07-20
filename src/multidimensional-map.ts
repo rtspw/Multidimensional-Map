@@ -6,8 +6,13 @@ export interface DimensionCollection<T> {
 
 export type QueryRange<T> = [T, T]
 
+export interface Query<T> {
+  matches?: (string | number)[],
+  range?: QueryRange<T>
+}
+
 export interface MatchQuery<T> {
-  [dimension: string]: T | QueryRange<T>
+  [dimension: string]: T | Query<T>
 }
 
 /* Gets the intersection of the Array type (not Set)
@@ -62,19 +67,22 @@ class MultidimensionalMap<EntryT> {
   }
 
   getEntriesInRange(dimension: string, start: string | number, end: string | number): EntryT[] {
-    if (start === end) return this.dimensions[dimension].get(start) 
-    let withinRange: boolean = false
+    if (!this.dimensions.hasOwnProperty(dimension))
+      throw new Error(`Dimension "${dimension}" does not exist`) 
+    const targetDimension: OrderedMap<string | number, EntryT[]> = this.dimensions[dimension]
+    const startIdx: number = (() => {
+      const startIdx = targetDimension.indexOf(start)
+      return startIdx === -1 ? 0 : startIdx
+    })()
+    const endIdx: number = (() => {
+      const endIdx = targetDimension.indexOf(end)
+      return endIdx === -1 ? targetDimension.length - 1 : endIdx
+    })()
     const entryList: EntryT[] = []
-    this.dimensions[dimension].forEach((entries, item) => {
-      if (withinRange) {
-        if (item === end) withinRange = false
-        entryList.push(...entries)
-      }
-      else if (!withinRange && item === start) {
-        withinRange = true
-        entryList.push(...entries)
-      }
-    })
+    for (let i = startIdx; i <= endIdx; i++) {
+      const entries = targetDimension.getAt(i)
+      entryList.push(...entries)
+    }
     return entryList
   }
 
@@ -82,9 +90,19 @@ class MultidimensionalMap<EntryT> {
     const subsets = Object.entries(query).map(([dimensionName, dimensionItem]) => {
       if (!this.dimensions.hasOwnProperty(dimensionName)) 
         throw new Error(`Dimension "${dimensionName}" does not exist`) 
-      if (Array.isArray(dimensionItem)) {
-        const [start, end] = dimensionItem
-        return this.getEntriesInRange(dimensionName, start, end)
+      if (typeof dimensionItem === 'object') {
+        if (dimensionItem.range && dimensionItem.matches) {
+          throw new Error(`Must specify either "range" or "matches" property but not both`)
+        } else if (dimensionItem.range) {
+          const [start, end] = dimensionItem.range
+          return this.getEntriesInRange(dimensionName, start, end)
+        } else if (dimensionItem.matches) {
+          return dimensionItem.matches.map((queryItem) => {
+            return this.dimensions[dimensionName].get(queryItem as number | string)
+          }).flat(1)
+        } else {
+          return this.entries
+        }
       }
       return this.dimensions[dimensionName].get(dimensionItem as number | string)
     })

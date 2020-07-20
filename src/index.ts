@@ -2,6 +2,7 @@ import OrderedMap from './ordered-map'
 import MultidimensionalMap from './multidimensional-map'
 
 import data from './test'
+import testData from './test-data'
 
 interface VolumeDataEntry {
   Volume: number,
@@ -13,7 +14,5 @@ interface VolumeDataEntry {
   Year: string,
 }
 
-const test = new MultidimensionalMap<VolumeDataEntry>(['Day', 'Week', 'Month', 'Quarter', 'Year', 'Severity']);
-test.addEntries(data.VolumeData)
-console.log(test.combineEntries(test.getEntriesInRange('Day', '07/01/18', '07/12/20'), 'Volume', ['Severity', 'Quarter']))
-console.log(test.length)
+const test = new MultidimensionalMap<VolumeDataEntry>(['Day', 'Week', 'Month', 'Quarter', 'Year', 'Severity'], data.VolumeData);
+console.log(test.getSubset({ Day: { range: ['06/01/18', '06/30/18']} , Severity: 1 }).combineEntries('Volume', ['Week']))
