@@ -1,7 +1,8 @@
 {
   "name": "multidimensional-map",
   "version": "0.1.0",
-  "description": "",
+  "description": "Maps multiple keys to one entry",
+  "keywords": ["map", "multidimensional", "key", "cube", "olap"],
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -13,7 +14,7 @@
     "prebuild": "[ -d dist ] && rm -f dist/*",
     "build": "rollup -c"
   },
-  "author": "rtspw",
+  "author": "rtspw <espaspw@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
