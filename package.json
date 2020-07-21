@@ -1,8 +1,14 @@
 {
   "name": "multidimensional-map",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Maps multiple keys to one entry",
-  "keywords": ["map", "multidimensional", "key", "cube", "olap"],
+  "keywords": [
+    "map",
+    "multidimensional",
+    "key",
+    "cube",
+    "olap"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
