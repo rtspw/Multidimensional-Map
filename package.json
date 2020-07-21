@@ -18,7 +18,8 @@
   "scripts": {
     "prepare": "rollup -c",
     "prebuild": "[ -d dist ] && rm -f dist/*",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "test": "jest"
   },
   "author": "rtspw <espaspw@gmail.com>",
   "license": "MIT",
@@ -27,6 +28,7 @@
     "url": "https://github.com/rtspw/Multidimensional-Map"
   },
   "devDependencies": {
+    "jest": "^26.1.0",
     "rollup": "^2.22.1",
     "rollup-plugin-typescript2": "^0.27.1",
     "typescript": "^3.9.7"
