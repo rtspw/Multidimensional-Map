@@ -19,6 +19,7 @@
     "prepare": "rollup -c",
     "prebuild": "[ -d dist ] && rm -f dist/*",
     "build": "rollup -c",
+    "pretest": "npm run build",
     "test": "jest"
   },
   "author": "rtspw <espaspw@gmail.com>",

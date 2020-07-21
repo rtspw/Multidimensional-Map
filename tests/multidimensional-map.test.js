@@ -59,6 +59,10 @@ describe(`Subsetting features`, () => {
 
 describe(`Combining features`, () => {
   const testMap = new MultidimensionalMap(['day', 'hour', 'item'], data)
+  test(`Error handling`, () => {
+    expect(() => testMap.combineEntries('numberSold', ['dday'])).toThrow(/does not exist/)
+    expect(testMap.combineEntries('foo')).toEqual({ foo: NaN })
+  })
   test(`Total sum`, () => {
     expect(testMap.combineEntries('numberSold')).toEqual({ numberSold: 800 })
   })
@@ -93,5 +97,21 @@ describe(`Combining features`, () => {
         },
       }
     )
+  })
+  test(`Multiple Measures`, () => {
+    const miniData = [
+      { day: '07/20/2020', hour: '8am', item: 'apple', numberSold: 35, measure2: 1 },
+      { day: '07/20/2020', hour: '8am', item: 'orange', numberSold: 12, measure2: 2 },
+      { day: '07/20/2020', hour: '8am', item: 'banana', numberSold: 26, measure2: 3 },
+    ]
+    const miniTestMap = new MultidimensionalMap(['day', 'hour', 'item'], miniData)
+    expect(miniTestMap.combineEntries(['numberSold', 'measure2'], ['hour'])).toEqual({
+      '8am': { numberSold: 73, measure2: 6, hour: '8am' },
+    })
+    expect(miniTestMap.combineEntries(['numberSold', 'measure2'], ['item'])).toEqual({
+      apple: { numberSold: 35, measure2: 1, item: 'apple' },
+      orange: { numberSold: 12, measure2: 2, item: 'orange' },
+      banana: { numberSold: 26, measure2: 3, item: 'banana' },
+    })
   })
 })

@@ -112,38 +112,51 @@ class MultidimensionalMap<EntryT> {
     return new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray)
   }
 
-  combineEntries(measure: keyof EntryT, fields?: string[], entries?: EntryT[]) {
+  combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string[], entries?: EntryT[]) {
     const dataEntries = entries ? entries : this.entries
+    const _measures = Array.isArray(measures) ? measures : [measures]
     if (dataEntries.length === 0) return []
-    const nestedEntries = {}
-    if (fields == null || fields.length === 0) {
-      nestedEntries[measure as string] = 0
-      dataEntries.forEach(entry => nestedEntries[measure as string] += entry[measure])
-      return nestedEntries
+    const output = {}
+
+    /* If no fields are given, simply sum over the measure */
+    if (dimensions == null || dimensions.length === 0) {
+      output[measures as string] = 0
+      dataEntries.forEach(entry => {
+        _measures.forEach(measure => output[measure as string] += entry[measure])
+      })
+      return output
     }
-    fields.forEach(field => { 
-      if (!this.dimensions.hasOwnProperty(field)) throw new Error(`Field "${field}" does not exist`) 
+
+    /* Checks that all the dimension names exist */
+    dimensions.forEach(dimension => { 
+      if (!this.dimensions.hasOwnProperty(dimension)) throw new Error(`Field "${dimension}" does not exist`) 
     })
+
+    /* Creates nested objects if it doesn't exist, and sum over the measures
+     * current keeps track of level of nesting in output object */
     dataEntries.forEach(dataEntry => {
-      let current = nestedEntries
-      fields.forEach((subfield, idx) => {
-        if (current[dataEntry[subfield]] == null) {
-          if (idx >= fields.length - 1) {
-            const subset = { [measure]: dataEntry[measure] }
-            fields.forEach(subfield => { subset[subfield] = dataEntry[subfield] })
-            current[dataEntry[subfield]] = subset
+      let current = output
+      dimensions.forEach((dimension, idx) => {
+        const dimensionValue = dataEntry[dimension]
+        const lastItemIndex = dimensions.length - 1
+        if (current[dimensionValue] == null) {
+          if (idx === lastItemIndex) {
+            const subsetOfEntry = {}
+            _measures.forEach(measure => subsetOfEntry[measure as string] = dataEntry[measure])
+            dimensions.forEach(dimension => subsetOfEntry[dimension] = dataEntry[dimension])
+            current[dimensionValue] = subsetOfEntry
           } else {
-            current[dataEntry[subfield]] = {}
+            current[dimensionValue] = {}
           }
         } else {
-          if (idx >= fields.length - 1) {
-            current[dataEntry[subfield]][measure] += dataEntry[measure]
+          if (idx === lastItemIndex) {
+            _measures.forEach(measure => current[dimensionValue][measure] += dataEntry[measure])
           }
         }
-        current = current[dataEntry[subfield]]
+        current = current[dimensionValue]
       })
     })
-    return nestedEntries
+    return output
   }
 
   get length() {
