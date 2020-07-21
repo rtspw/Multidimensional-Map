@@ -6,6 +6,8 @@
 
 NPM: <https://www.npmjs.com/package/multidimensional-map>
 
+[Skip to API](#API)
+
 ## Summary 
 A multidimensional map allows multiple keys to be mapped to a numeric value, called a **measure** (e.g. "money", "volume"). Each of those keys will be part of a separate **dimension** (e.g. "age", "month", "gender").
 
@@ -152,39 +154,39 @@ const combinedOverBoth2 = subset.combineEntries('numberSold', ['hour', 'item'])
 Creates a map with certain dimensions (entries may have more keys than needed). The `entries` parameter works the same as using `addEntries`.
 
 
-- #### `addEntries(entries: EntryType[]): void`
+#### `addEntries(entries: EntryType[]): void`
 
   Adds an array of entries to the map. The dimensions of the entries should be the same as those specified in the constructor.
 
-- #### `getAllEntries(): EntryType[]`
+#### `getAllEntries(): EntryType[]`
 
   Returns all entries in the map in insertion order.
 
-- #### `getSubset(query: Query): MultidimensionalMap`
+#### `getSubset(query: Query): MultidimensionalMap`
 
   Creates a subset of the current entries using specified constraints. See [Usage](#Usage) for examples.
 
-  - ##### `query[dimension]: (string | number) or object`
+  ##### `query[dimension]: (string | number) or object`
 
   If passed a string or number key, it will try to find direct matches to key within the dimension. If given an object, either a `range` or `matches` can be specified, but not both.
   
-  - ###### `query[dimension].range? : [start: (string | number), end: (string | number)]`
+  ###### `query[dimension].range? : [start: (string | number), end: (string | number)]`
 
   Gives all entries within the range (start, end), inclusive. Ordering is determined by insertion order, but range won't always make sense of some dimensions (e.g. itemType).
 
-  - ###### `query[dimension].matches? : (string | number)[]`
+  ###### `query[dimension].matches? : (string | number)[]`
 
   Allows for multiple direct match queries. Specifying just one item is equivalent to setting `query[dimension]` as that item.
 
-- #### `getSubsetArray(query: Query): EntryType[]`
+#### `getSubsetArray(query: Query): EntryType[]`
 
   Similar to `getSubset`, but gives array back directly instead of inserting it into a new map.
 
-- #### `combineEntries(measure: string, fields?: string[], entries?: EntryT[])`
+#### `combineEntries(measure: string, fields?: string[], entries?: EntryT[])`
   - `measure`: name of the key to sum over.
   - `fields?`: dimension names that determine how the measures are summed. Entries with the same key within those dimensions are combined into a single entry. The order the fields also specifies the nesting of the output object. If fields is empty or not given, it will sum up the measure over all entries.
   - `entries?`: special override for which entries the function is run on, making it work similarly to a static function
 
-- #### `length: number`
+#### `length: number`
 
   Getter for number of entries in the map
