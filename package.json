@@ -1,6 +1,6 @@
 {
   "name": "multidimensional-map",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Maps multiple keys to one entry",
   "keywords": [
     "map",
