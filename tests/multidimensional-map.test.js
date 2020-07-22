@@ -67,36 +67,36 @@ describe(`Combining features`, () => {
     expect(testMap.combineEntries('numberSold')).toEqual({ numberSold: 800 })
   })
   test(`One field`, () => {
-    expect(testMap.combineEntries('numberSold', ['hour'])).toEqual(
-      {
-        '8am': { hour: '8am', numberSold: 127 },
-        '9am': { hour: '9am', numberSold: 126 },
-        '10am': { hour: '10am', numberSold: 233 },
-        '11am': { hour: '11am', numberSold: 314 },
-      }
-    )
-    expect(testMap.combineEntries('numberSold', ['day'])).toEqual(
-      {
-        '07/20/2020': { day: '07/20/2020', numberSold: 409 },
-        '07/21/2020': { day: '07/21/2020', numberSold: 391 },
-      }
-    )
+    expect(testMap.combineEntries('numberSold', 'hour')).toEqual({
+      '8am': { hour: '8am', numberSold: 127 },
+      '9am': { hour: '9am', numberSold: 126 },
+      '10am': { hour: '10am', numberSold: 233 },
+      '11am': { hour: '11am', numberSold: 314 },
+    })
+    expect(testMap.combineEntries('numberSold', ['hour'])).toEqual({
+      '8am': { hour: '8am', numberSold: 127 },
+      '9am': { hour: '9am', numberSold: 126 },
+      '10am': { hour: '10am', numberSold: 233 },
+      '11am': { hour: '11am', numberSold: 314 },
+    })
+    expect(testMap.combineEntries('numberSold', ['day'])).toEqual({
+      '07/20/2020': { day: '07/20/2020', numberSold: 409 },
+      '07/21/2020': { day: '07/21/2020', numberSold: 391 },
+    })
   })
   test(`Two fields`, () => {
-    expect(testMap.getSubset({ hour: '9am' }).combineEntries('numberSold', ['day', 'item'])).toEqual(
-      {
-        '07/20/2020': { 
-          apple: { day: '07/20/2020', item: 'apple', numberSold: 33 }, 
-          banana: { day: '07/20/2020', item: 'banana', numberSold: 11 }, 
-          orange: { day: '07/20/2020', item: 'orange', numberSold: 23 },
-        }, 
-        '07/21/2020': {
-          apple: { day: '07/21/2020', item: 'apple', numberSold: 20 }, 
-          banana: { day: '07/21/2020', item: 'banana', numberSold: 23 }, 
-          orange: { day: '07/21/2020', item: 'orange', numberSold: 16 },
-        },
-      }
-    )
+    expect(testMap.getSubset({ hour: '9am' }).combineEntries('numberSold', ['day', 'item'])).toEqual({
+      '07/20/2020': { 
+        apple: { day: '07/20/2020', item: 'apple', numberSold: 33 }, 
+        banana: { day: '07/20/2020', item: 'banana', numberSold: 11 }, 
+        orange: { day: '07/20/2020', item: 'orange', numberSold: 23 },
+      }, 
+      '07/21/2020': {
+        apple: { day: '07/21/2020', item: 'apple', numberSold: 20 }, 
+        banana: { day: '07/21/2020', item: 'banana', numberSold: 23 }, 
+        orange: { day: '07/21/2020', item: 'orange', numberSold: 16 },
+      },
+    })
   })
   test(`Multiple Measures`, () => {
     const miniData = [

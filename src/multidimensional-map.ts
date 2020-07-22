@@ -112,9 +112,10 @@ class MultidimensionalMap<EntryT> {
     return new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray)
   }
 
-  combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string[], entries?: EntryT[]) {
+  combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string | string[], entries?: EntryT[]) {
     const dataEntries = entries ? entries : this.entries
     const _measures = Array.isArray(measures) ? measures : [measures]
+    const _dimensions = Array.isArray(dimensions) ? dimensions : [dimensions]
     if (dataEntries.length === 0) return []
     const output = {}
 
@@ -130,7 +131,7 @@ class MultidimensionalMap<EntryT> {
     }
 
     /* Checks that all the dimension names exist */
-    dimensions.forEach(dimension => { 
+    _dimensions.forEach(dimension => { 
       if (!this.dimensions.hasOwnProperty(dimension)) throw new Error(`Field "${dimension}" does not exist`) 
     })
 
@@ -138,14 +139,14 @@ class MultidimensionalMap<EntryT> {
      * current keeps track of level of nesting in output object */
     dataEntries.forEach(dataEntry => {
       let current = output
-      dimensions.forEach((dimension, idx) => {
+      _dimensions.forEach((dimension, idx) => {
         const dimensionValue = dataEntry[dimension]
-        const lastItemIndex = dimensions.length - 1
+        const lastItemIndex = _dimensions.length - 1
         if (current[dimensionValue] == null) {
           if (idx === lastItemIndex) {
             const subsetOfEntry = {}
             _measures.forEach(measure => subsetOfEntry[measure as string] = dataEntry[measure])
-            dimensions.forEach(dimension => subsetOfEntry[dimension] = dataEntry[dimension])
+            _dimensions.forEach(dimension => subsetOfEntry[dimension] = dataEntry[dimension])
             current[dimensionValue] = subsetOfEntry
           } else {
             current[dimensionValue] = {}
