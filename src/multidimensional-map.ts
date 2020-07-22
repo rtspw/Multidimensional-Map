@@ -120,9 +120,11 @@ class MultidimensionalMap<EntryT> {
 
     /* If no fields are given, simply sum over the measure */
     if (dimensions == null || dimensions.length === 0) {
-      output[measures as string] = 0
       dataEntries.forEach(entry => {
-        _measures.forEach(measure => output[measure as string] += entry[measure])
+        _measures.forEach(measure => {
+          if (output[measure as string] == null) output[measure as string] = 0
+          output[measure as string] += entry[measure]
+        })
       })
       return output
     }

@@ -105,6 +105,7 @@ describe(`Combining features`, () => {
       { day: '07/20/2020', hour: '8am', item: 'banana', numberSold: 26, measure2: 3 },
     ]
     const miniTestMap = new MultidimensionalMap(['day', 'hour', 'item'], miniData)
+    expect(miniTestMap.combineEntries(['numberSold', 'measure2'])).toEqual({ numberSold: 73, measure2: 6 })
     expect(miniTestMap.combineEntries(['numberSold', 'measure2'], ['hour'])).toEqual({
       '8am': { numberSold: 73, measure2: 6, hour: '8am' },
     })
