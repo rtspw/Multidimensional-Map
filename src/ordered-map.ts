@@ -70,4 +70,4 @@ class OrderedMap<K, V> {
   }
 }
 
-export default OrderedMap
+export { OrderedMap }

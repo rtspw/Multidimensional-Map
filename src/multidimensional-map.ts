@@ -1,10 +1,10 @@
-import OrderedMap from './ordered-map'
+import { OrderedMap } from './ordered-map'
 
 export interface DimensionCollection<T> {
   [key: string]: OrderedMap<string | number, T>
 }
 
-export type QueryRange<T> = [T, T]
+export type QueryRange<T> = [T | null, T | null]
 
 export interface QueryDetails<T> {
   matches?: (string | number)[],
@@ -66,13 +66,13 @@ class MultidimensionalMap<EntryT> {
     return this.entries
   }
 
-  getEntriesInRange(dimension: string, start: string | number | null, end: string | number | null): EntryT[] {
+  getEntriesInRange(dimension: keyof EntryT, start: string | number | null, end: string | number | null): EntryT[] {
     if (!this.dimensions.hasOwnProperty(dimension)) throw new Error(`Dimension "${dimension}" does not exist`) 
-    const targetDimension: OrderedMap<string | number, EntryT[]> = this.dimensions[dimension]
+    const targetDimension: OrderedMap<string | number, EntryT[]> = this.dimensions[dimension as string]
     const startIdx = start == null ? 0 : targetDimension.indexOf(start)
     const endIdx = end == null ? targetDimension.length - 1 : targetDimension.indexOf(end)
-    if (startIdx === -1) throw new Error(`Range start "${start}" does not exist in dimension`)
-    if (endIdx === -1) throw new Error(`Range end "${end}" does not exist`)
+    if (startIdx === -1) throw new Error(`Range start "${start}" does not exist in dimension "${dimension}"`)
+    if (endIdx === -1) throw new Error(`Range end "${end}" does not exist in dimension "${dimension}"`)
     const entryList: EntryT[] = []
     for (let i = startIdx; i <= endIdx; i++) {
       const entries = targetDimension.getAt(i)
@@ -90,11 +90,12 @@ class MultidimensionalMap<EntryT> {
           throw new Error(`Must specify either "range" or "matches" property but not both`)
         } else if (dimensionItem.range) {
           const [start, end] = dimensionItem.range
-          return this.getEntriesInRange(dimensionName, start, end)
+          return this.getEntriesInRange(<keyof EntryT>dimensionName, start, end)
         } else if (dimensionItem.matches) {
           const matchingEntries: EntryT[] = []
           dimensionItem.matches.forEach((queryItem) => {
             const matchResult = this.dimensions[dimensionName].get(queryItem as number | string)
+            if (matchResult === undefined) throw new Error(`"${queryItem}" does not exist in dimension "${dimensionName}"`)
             matchingEntries.push(...matchResult)
           })
           return matchingEntries
@@ -167,4 +168,4 @@ class MultidimensionalMap<EntryT> {
   }
 }
 
-export default MultidimensionalMap 
+export { MultidimensionalMap } 

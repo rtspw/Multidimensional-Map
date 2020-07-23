@@ -55,6 +55,10 @@ describe(`Subsetting features`, () => {
     expect(testMap.getSubsetArray({ day: '07/20/2020', item: 'banana', hour: '10am' })).toStrictEqual([data[8]])
     expect(testMap.getSubset({ day: '07/20/2020' }).getSubset({ item: 'banana' }).getSubsetArray({ hour: '10am' })).toStrictEqual([data[8]])
   })
+  test(`Error handling`, () => {
+    expect(() => testMap.getSubset({day: {matches: ['foo']}})).toThrow(/not exist/)
+    expect(() => testMap.getSubset({hour: {range: ['9am', '13am']}})).toThrow(/not exist/)
+  })
 })
 
 describe(`Combining features`, () => {

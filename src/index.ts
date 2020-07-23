@@ -1,1 +1,2 @@
-export { default as MultidimensionalMap } from "./multidimensional-map"
+export * from './multidimensional-map'
+export * from './ordered-map'
