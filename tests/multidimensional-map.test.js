@@ -27,6 +27,28 @@ const data = [
   { day: '07/21/2020', hour: '11am', item: 'banana', numberSold: 26 },
 ]
 
+const incompleteData = [
+  { day: '07/20/2020', hour: '8am', item: 'apple', numberSold: 35 },
+  { day: '07/20/2020', hour: '8am', item: 'orange', numberSold: 12 },
+  { day: '07/20/2020', hour: '8am', item: 'banana', numberSold: 26 },
+  { day: '07/20/2020', hour: '9am', item: 'apple', numberSold: 33 },
+  { day: '07/20/2020', hour: '9am', item: 'orange', numberSold: 23 },
+  { day: '07/20/2020', hour: '10am', item: 'apple', numberSold: 46 },
+  { day: '07/20/2020', hour: '10am', item: 'banana', numberSold: 32 },
+  { day: '07/20/2020', hour: '11am', item: 'apple', numberSold: 67 },
+  { day: '07/20/2020', hour: '11am', item: 'orange', numberSold: 36 },
+  { day: '07/20/2020', hour: '11am', item: 'banana', numberSold: 54 },
+  { day: '07/21/2020', hour: '8am', item: 'apple', numberSold: 25 },
+  { day: '07/21/2020', hour: '8am', item: 'orange', numberSold: 8 },
+  { day: '07/21/2020', hour: '8am', item: 'banana', numberSold: 21 },
+  { day: '07/21/2020', hour: '10am', item: 'apple', numberSold: 50 },
+  { day: '07/21/2020', hour: '10am', item: 'orange', numberSold: 39 },
+  { day: '07/21/2020', hour: '10am', item: 'banana', numberSold: 32 },
+  { day: '07/21/2020', hour: '11am', item: 'apple', numberSold: 78 },
+  { day: '07/21/2020', hour: '11am', item: 'orange', numberSold: 53 },
+  { day: '07/21/2020', hour: '11am', item: 'banana', numberSold: 26 },
+]
+
 test(`Basic structure of the map`, () => {
   const testMap = new MultidimensionalMap(['day', 'hour', 'item'], data)
   expect(testMap.dimensions['day'].length).toBe(2)
@@ -118,5 +140,38 @@ describe(`Combining features`, () => {
       orange: { numberSold: 12, measure2: 2, item: 'orange' },
       banana: { numberSold: 26, measure2: 3, item: 'banana' },
     })
+  })
+  test(`Changing Order`, () => {
+    const wackyMap = new MultidimensionalMap(['day', 'hour', 'item'], data, { day: ['07/21/2020', '07/20/2020'], hour: ['11am', '8am', '9am', '10am'] })
+    expect(wackyMap.getSubsetArray({ hour: { range: ['9am', null] } })).toEqual([
+      { day: '07/20/2020', hour: '9am', item: 'apple', numberSold: 33 },
+      { day: '07/20/2020', hour: '9am', item: 'orange', numberSold: 23 },
+      { day: '07/20/2020', hour: '9am', item: 'banana', numberSold: 11 },
+      { day: '07/21/2020', hour: '9am', item: 'apple', numberSold: 20 },
+      { day: '07/21/2020', hour: '9am', item: 'orange', numberSold: 16 },
+      { day: '07/21/2020', hour: '9am', item: 'banana', numberSold: 23 },
+      { day: '07/20/2020', hour: '10am', item: 'apple', numberSold: 46 },
+      { day: '07/20/2020', hour: '10am', item: 'orange', numberSold: 34 },
+      { day: '07/20/2020', hour: '10am', item: 'banana', numberSold: 32 },
+      { day: '07/21/2020', hour: '10am', item: 'apple', numberSold: 50 },
+      { day: '07/21/2020', hour: '10am', item: 'orange', numberSold: 39 },
+      { day: '07/21/2020', hour: '10am', item: 'banana', numberSold: 32 }
+    ])
+    expect(() => new MultidimensionalMap(['day', 'hour', 'item'], data, { day: ['07/21/2020', '07/20/2020'], hours: ['11am', '8am', '9am', '10am'] })).toThrow()
+    expect((new MultidimensionalMap(['day', 'hour', 'item'], data, { hour: ['11am', '10am'] })).dimensions.hour.order).toEqual(['11am', '10am', '8am', '9am'])
+    expect(() => (new MultidimensionalMap(['day', 'hour', 'item'], data, { day: ['junk'] })).combineEntries('numberSold', 'day')).not.toThrow()
+  })
+  test(`Incomplete Data`, () => {
+    const incompleteMap = new MultidimensionalMap(['day', 'hour', 'item'], incompleteData)
+    // 9am should normally be missing from the subsetted data
+    expect(incompleteMap.getSubset({ day: '07/21/2020' }, { keepOrder: true }).dimensions.hour.order)
+      .toEqual(['8am', '9am', '10am', '11am'])
+    expect(incompleteMap.getSubset({ day: '07/21/2020' }, { keepOrder: true }).combineEntries('numberSold', 'hour'))
+      .toEqual({
+        '8am': { numberSold: 54, hour: '8am' },
+        '10am': { numberSold: 121, hour: '10am' },
+        '11am': { numberSold: 157, hour: '11am' },
+      })
+    expect(() => incompleteMap.getSubset({ day: '07/21/2020' }, { keepOrder: ['asdf'] }).dimensions.hour).toThrow(/not exist/)
   })
 })

@@ -1,17 +1,26 @@
 /* An OrderedMap represents a Map which allows array-style indexing over the keys
  * While the normal map keeps insertion order, this gives an easier way to access arbitrary indicies without using iterators */
 class OrderedMap<K, V> {
-  map: Map<K, V> = new Map()
+  map: Map<K, V | null> = new Map()
   order: K[] = []
 
+  constructor(keyOrder: K[] = []) {
+    this.order = keyOrder
+    for (const key of keyOrder) {
+      this.map.set(key, null)
+    }
+  }
+
   append(key: K, value: V): void {
+    if (!this.map.has(key))
+      this.order.push(key)
     this.map.set(key, value)
-    this.order.push(key)
   }
 
   prepend(key: K, value: V): void {
+    if (!this.map.has(key))
+      this.order.unshift(key)
     this.map.set(key, value)
-    this.order.unshift(key)
   }
 
   has(key: K): boolean {

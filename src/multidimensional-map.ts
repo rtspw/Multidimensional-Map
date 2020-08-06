@@ -15,6 +15,14 @@ export interface MatchQuery<T> {
   [dimension: string]: T | QueryDetails<T>
 }
 
+export interface OrderOverride {
+  [dimension: string]: (string | number)[],
+}
+
+export interface SubsetOptions {
+  keepOrder?: string[] | boolean,
+}
+
 /* Gets the intersection of the Array type (not Set)
  * Implementation assumes that array items are unique */
 function getArrayIntersection<T>(...sets: (T[])[]) {
@@ -38,9 +46,13 @@ class MultidimensionalMap<EntryT> {
   dimensions: DimensionCollection<EntryT[]>
   entries: EntryT[] = []
 
-  constructor(dimensions: string[], entries?: EntryT[]) {
+  constructor(dimensions: string[], entries?: EntryT[], order: OrderOverride = {}) {
+    Object.keys(order).forEach(dimensionName => { 
+      if (!dimensions.includes(dimensionName)) throw new Error(`Invalid dimension '${dimensionName}'`)
+    })
     this.dimensions = dimensions.reduce((acc: DimensionCollection<EntryT[]>, curr: string) => {
-      acc[curr] = new OrderedMap<string | number, EntryT[]>()
+      const startingOrder = order[curr]
+      acc[curr] = new OrderedMap<string | number, EntryT[]>(startingOrder)
       return acc
     }, {})
     if (entries) {
@@ -54,7 +66,7 @@ class MultidimensionalMap<EntryT> {
       Object.keys(this.dimensions).forEach(dimension => {
         const entryValueForDimension = entry[dimension]
         const dimensionMap = this.dimensions[dimension]
-        if (!dimensionMap.has(entryValueForDimension)) {
+        if (dimensionMap.get(entryValueForDimension) === null || !dimensionMap.has(entryValueForDimension)) {
           dimensionMap.append(entryValueForDimension, [])
         }
         dimensionMap.get(entryValueForDimension).push(entry)
@@ -76,6 +88,7 @@ class MultidimensionalMap<EntryT> {
     const entryList: EntryT[] = []
     for (let i = startIdx; i <= endIdx; i++) {
       const entries = targetDimension.getAt(i)
+      if (entries === null) continue;
       entryList.push(...entries)
     }
     return entryList
@@ -105,12 +118,22 @@ class MultidimensionalMap<EntryT> {
       }
       return this.dimensions[dimensionName].get(dimensionItem as number | string)
     })
-    return getArrayIntersection(...subsets)
+    return getArrayIntersection(...subsets.filter(subset => subset != null))
   }
 
-  getSubset(query: MatchQuery<string | number>): MultidimensionalMap<EntryT> {
+  getSubset(query: MatchQuery<string | number>, options: SubsetOptions = {}): MultidimensionalMap<EntryT> {
+    const { keepOrder = false } = options
     const subsetArray = this.getSubsetArray(query)
-    return new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray)
+    const ordering = {}
+    if (keepOrder === true)
+      Object.keys(this.dimensions).forEach(dimension => { ordering[dimension] = this.dimensions[dimension].order })
+    else if (Array.isArray(keepOrder) && keepOrder.length > 0)
+      keepOrder.forEach(dimension => { 
+        if (this.dimensions[dimension] === undefined) throw new Error(`Dimension '${dimension}' does not exist`)
+        ordering[dimension] = this.dimensions[dimension].order
+      })
+    const subsetMap = new MultidimensionalMap<EntryT>(Object.keys(this.dimensions), subsetArray, ordering)
+    return subsetMap
   }
 
   combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string | string[], entries?: EntryT[]) {
