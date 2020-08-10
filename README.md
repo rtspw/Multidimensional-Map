@@ -147,10 +147,9 @@ const combinedOverBoth2 = subset.combineEntries('numberSold', ['hour', 'item'])
 
 ## API
 
-### `new MultidimensionalMap(dimensions: string[], entries?: EntryType[])`
+### `new MultidimensionalMap(dimensions: string[], entries?: EntryType[], order?: Order)`
 
-Creates a map with certain dimensions (entries may have more keys than needed). The `entries` parameter works the same as using `addEntries`.
-
+Creates a map with certain dimensions (entries may have more keys than needed). The `entries` parameter works the same as using `addEntries`. Order allows an optional override for the ordering (usually determined by insertion order), which takes dimension names as keys and arrays as values.
 
 #### `addEntries(entries: EntryType[]): void`
 
@@ -160,7 +159,7 @@ Creates a map with certain dimensions (entries may have more keys than needed). 
 
   Returns all entries in the map in insertion order.
 
-#### `getSubset(query: Query): MultidimensionalMap`
+#### `getSubset(query: Query, options?: SubsetOptions): MultidimensionalMap`
 
   Creates a subset of the current entries using specified constraints. See [Usage](#Usage) for examples.
 
@@ -175,6 +174,12 @@ Creates a map with certain dimensions (entries may have more keys than needed). 
   - `query[dimension].matches? : (string | number)[]`
 
     Allows for multiple direct match queries. Specifying just one item is equivalent to setting `query[dimension]` as that item.
+
+- `options.keepOrder : string[] | boolean`
+
+  Given true, the subset will have the same order as the original map for all dimensions, even if the subset have no entries under certain items in a dimension. 
+
+  To specify only certain dimensions to preserve ordering, pass a string array with dimension names. 
 
 #### `getSubsetArray(query: Query): EntryType[]`
 
