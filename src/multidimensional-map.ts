@@ -136,19 +136,19 @@ class MultidimensionalMap<EntryT> {
     return subsetMap
   }
 
-  combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string | string[], entries?: EntryT[]) {
+  combineEntries(measures: keyof EntryT | (keyof EntryT)[], dimensions?: string | string[], entries?: EntryT[]): any {
     const dataEntries = entries ? entries : this.entries
     const _measures = Array.isArray(measures) ? measures : [measures]
     const _dimensions = Array.isArray(dimensions) ? dimensions : [dimensions]
-    if (dataEntries.length === 0) return []
+    if (dataEntries.length === 0) return {}
     const output = {}
 
     /* If no fields are given, simply sum over the measure */
     if (dimensions == null || dimensions.length === 0) {
       dataEntries.forEach(entry => {
         _measures.forEach(measure => {
-          if (output[measure as string] == null) output[measure as string] = 0
-          output[measure as string] += entry[measure]
+          if (output[measure as string] == null) (output as Partial<EntryT>)[measure as string] = 0;
+          (output as Partial<EntryT>)[measure as string] += entry[measure]
         })
       })
       return output
